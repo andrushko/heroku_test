@@ -2,7 +2,7 @@ var wsServer = require('websocket').server;
 var http = require('http');
 var fs   = require('fs');
 
-var webSocketsServerPort = 8443;
+var webSocketsServerPort = 8080;
 
 var server = http.createServer(function(request, response) {
 
@@ -18,12 +18,12 @@ var server = http.createServer(function(request, response) {
         response.end();
     });
 
-}).listen(webSocketsServerPort);
-
+});
 server.listen(webSocketsServerPort, function() {
     console.log((new Date()).toTimeString() + "Http Server is listening on port " +
         webSocketsServerPort);
 });
+
 var wsServer = new wsServer({
     httpServer: server
 });
