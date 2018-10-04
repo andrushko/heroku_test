@@ -1,30 +1,50 @@
-'use strict';
-const Fs = require('fs');
-const Https = require('https');
-const WebSocketServer = require('ws').Server;
+var wsServer = require('websocket').server;
+var http = require('http');
+var fs   = require('fs');
 
-const httpsServer = Https.createServer({
-  key: Fs.readFileSync(process.env.KEY),
-  cert: Fs.readFileSync(process.env.CERT)
-});
-const wss = new WebSocketServer({
-  server: httpsServer
-});
+var webSocketsServerPort = process.env.PORT || 8080;;
 
-httpsServer.on('request', (req, res) => {
-  res.writeHead(200);
-  res.end('hello HTTPS world\n');
-});
+var server = http.createServer(function(request, response) {
 
-wss.on('connection', (ws) => {
-  ws.send('hello');
+    response.writeHead(200, {
+        'Content-Type': 'text/json',
+  		'Access-Control-Allow-Origin': '*',
+  		'X-Powered-By':'nodejs'
+    });
 
-  ws.on('message', (data) => {
-    ws.send('message received: ', data);
-  });
-  ws.on('close', () => {
-    console.log('socket closed');
-  });
+
+    fs.readFile('data.json', function(err, content){
+        response.write(content);
+        response.end();
+    });
+
 });
 
-httpsServer.listen(443);
+server.listen(webSocketsServerPort, function() {
+    console.log((new Date()).toTimeString() + " Http Server is listening on port " +
+        webSocketsServerPort);
+});
+
+var wsServer = new wsServer({
+    httpServer: server
+});
+
+var connections = [];
+wsServer.on('request', function(request) {
+	var connection = request.accept(null, request.origin);
+        console.log('res1');
+    connections.push(connection);
+	connection.on('message', function(message) {
+
+        console.log('res2');
+		var clientObj = message.utf8Data;
+
+		for (var i = 0; i < connections.length; i++) {
+			connections[i].sendUTF(JSON.stringify(clientObj));
+		}
+
+		
+	});
+});
+
+var alphabet = 'abcdefghijklmnopqrstuvwxyz';
