@@ -2,7 +2,7 @@ var wsServer = require('websocket').server;
 var http = require('http');
 var fs   = require('fs');
 
-var webSocketsServerPort = 443;
+var webSocketsServerPort = 8443;
 
 var server = http.createServer(function(request, response) {
 
