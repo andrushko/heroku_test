@@ -1,45 +1,25 @@
-var wsServer = require('websocket').server;
-var http = require('http');
-var fs   = require('fs');
+'use strict';
 
-var webSocketsServerPort = 8080;
+const express = require('express');
+const SocketServer = require('ws').Server;
+const path = require('path');
 
-var server = http.createServer(function(request, response) {
+const PORT = process.env.PORT || 3000;
+const INDEX = path.join(__dirname, 'index.html');
 
-    response.writeHead(200, {
-        'Content-Type': 'text/json',
-  		'Access-Control-Allow-Origin': '*',
-  		'X-Powered-By':'nodejs'
-    });
+const server = express()
+  .use((req, res) => res.sendFile(INDEX) )
+  .listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
+const wss = new SocketServer({ server });
 
-    fs.readFile('data.json', function(err, content){
-        response.write(content);
-        response.end();
-    });
-
-});
-server.listen(webSocketsServerPort, function() {
-    console.log((new Date()).toTimeString() + "Http Server is listening on port " +
-        webSocketsServerPort);
+wss.on('connection', (ws) => {
+  console.log('Client connected');
+  ws.on('close', () => console.log('Client disconnected'));
 });
 
-var wsServer = new wsServer({
-    httpServer: server
-});
-
-var connections = [];
-wsServer.on('request', function(request) {
-	var connection = request.accept(null, request.origin);
-
-	connection.on('message', function(message) {
-
-		var clientObj = message.utf8Data;
-
-		for (var i = 0; i < connections.length; i++) {
-			connections[i].sendUTF(JSON.stringify(clientObj));
-		}
-	});
-});
-
-var alphabet = 'abcdefghijklmnopqrstuvwxyz';
+setInterval(() => {
+  wss.clients.forEach((client) => {
+    client.send(new Date().toTimeString());
+  });
+}, 1000);
