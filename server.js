@@ -32,7 +32,6 @@ var wsServer = new wsServer({
 var connections = [];
 wsServer.on('request', function(request) {
 	var connection = request.accept(null, request.origin);
-        console.log('res1');
     connections.push(connection);
 	connection.on('message', function(message) {
 
@@ -40,10 +39,8 @@ wsServer.on('request', function(request) {
 		var clientObj = message.utf8Data;
 
 		for (var i = 0; i < connections.length; i++) {
-			connections[i].sendUTF(JSON.stringify(clientObj));
+			connections[i].sendUTF(clientObj);
 		}
-
-		
 	});
 });
 
