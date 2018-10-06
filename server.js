@@ -31,6 +31,9 @@ var wsServer = new wsServer({
 
 var connections = [];
 wsServer.on('request', function(request) {
+    console.log('res1');
+    // Add direct messages capability
+
 	var connection = request.accept(null, request.origin);
     connections.push(connection);
 	connection.on('message', function(message) {
